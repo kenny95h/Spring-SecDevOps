@@ -1,5 +1,8 @@
 package com.example.demo.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.example.demo.model.persistence.Cart;
 import com.example.demo.model.persistence.User;
 import com.example.demo.model.persistence.repositories.CartRepository;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+
+	public static final Logger log = LoggerFactory.getLogger(UserController.class);
 
 	@Autowired
 	private UserRepository userRepository;
@@ -44,11 +49,14 @@ public class UserController {
 		// validation for password
 		if(createUserRequest.getPassword().length()<7 ||
 				!createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword())){
+			log.error("Bad password: " + createUserRequest.getPassword());
 			return ResponseEntity.badRequest().build();
 		}
 		// Encode the password before saving
 		user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
 		userRepository.save(user);
+
+		log.info("User created with username: " + createUserRequest.getUsername());
 		return ResponseEntity.ok(user);
 	}
 
